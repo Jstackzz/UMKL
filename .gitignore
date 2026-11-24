@@ -1,0 +1,23 @@
+# Toolkits cloned or copied in (FBNeo, SDL3, GekkoNet): see docs/SETUP.md
+/external/
+
+# Build output
+/build/
+/out/
+*.obj
+*.pdb
+*.ilk
+
+# Game data never goes in the repository: ROM sets, NVRAM, saves, captures
+*.zip
+*.7z
+/roms/
+/nvram/
+/sessions/
+/captures/
+*.fs
+*.fr
+
+# Python
+__pycache__/
+*.pyc
