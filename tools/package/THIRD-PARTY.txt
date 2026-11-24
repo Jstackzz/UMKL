@@ -1,0 +1,27 @@
+MK Arcade Online is made with these. Their license texts are in the licenses folder.
+
+FinalBurn Neo (mka_fbneo.dll, the emulation core: its Midway drivers and the CPUs and sound chips they use)
+  https://github.com/finalburnneo/FBNeo
+  License: FinalBurn Neo's own, non-commercial (licenses/FBNeo-license.txt). The core's source, with this app's
+  changes, is at https://github.com/Jstackzz/UMKL (core/) and FBNeo's repository.
+
+Qt 6 (the Qt6*.dll files and the plugin and qml folders)
+  https://www.qt.io
+  License: GNU Lesser General Public License v3 (licenses/LGPL-3.0.txt; it builds on the GNU General Public License
+  v3, https://www.gnu.org/licenses/gpl-3.0.txt). The Qt libraries are used unmodified, as separate DLLs you may
+  replace with your own build. Qt's source code: https://download.qt.io/official_releases/qt/
+
+SDL 3 (controllers and sound, built into MKArcade.exe)
+  https://libsdl.org
+  License: zlib (licenses/SDL3-LICENSE.txt)
+
+GekkoNet (rollback netcode, built into MKArcade.exe)
+  https://github.com/HeatXD/GekkoNet
+  License: BSD 2-Clause (licenses/GekkoNet-LICENSE.txt)
+
+Microsoft Visual C++ runtime (msvcp140*.dll, vcruntime140*.dll)
+  Redistributed as Microsoft allows for the Visual C++ runtime files, beside the app that uses them.
+
+The online client comes from the MK3D Online launcher (https://github.com/Jstackzz/MK-3D-rollback).
+
+The Mortal Kombat games are not included: you need your own ROM sets.

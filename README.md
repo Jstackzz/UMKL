@@ -29,6 +29,9 @@ tools\build.cmd
 ```
 
 builds the core and the app into `build\Release` and puts the Qt runtime beside `build\Release\app\MKArcade.exe`.
+Then `powershell -File tools\package.ps1` makes the players' zip, `dist\MK-Arcade-Online-<version>-windows.zip`: the
+app, the core, the Qt and Visual C++ runtimes (nothing to install), an empty `roms` folder, a readme
+(`tools\package\README.txt`) and the licenses. Players unzip it, add their ROM sets and double-click `MKArcade.exe`.
 Needs the VS 2026 Build Tools, Git (for its Perl) and Qt 6.12 msvc2022_64 (the MK3D project's copy is found by
 itself). Toolchain and sources: [docs/SETUP.md](docs/SETUP.md).
 

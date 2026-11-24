@@ -29,4 +29,5 @@
    effects apart need the sound split.
 4. **Spectating** lobby matches (the server passes the players' feeds; the game would play them back) and King of the
    Hill lobbies: the protocol has both, this app offers neither yet (its hello says so).
-5. **Controls page** (remapping), the player package (no ROMs, Qt runtime beside the app), an updater.
+5. **Controls page** (remapping), and an updater for the players' zip (`tools/package.ps1` makes it: no ROMs, the Qt
+   and Visual C++ runtimes beside the app; checked unzipped on its own, with nothing of this PC's Qt on its path).

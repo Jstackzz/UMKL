@@ -1,9 +1,10 @@
 # Toolkits cloned or copied in (FBNeo, SDL3, GekkoNet): see docs/SETUP.md
 /external/
 
-# Build output
+# Build output, and the players' zip (tools\package.ps1)
 /build/
 /out/
+/dist/
 *.obj
 *.pdb
 *.ilk
