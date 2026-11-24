@@ -59,6 +59,11 @@ public:
 
     // the main RAM as FBNeo's achievement map lays it out (flat, from 0)
     uint32_t readRam(uint32_t addr, uint8_t* out, uint32_t n) const { return readRam_(addr, out, n); }
+    // the main CPU's memory by byte address, through the game's own handlers (CMOS behind its write-enable latch)
+    uint16_t cpuReadWord(uint32_t byteAddr) const { return uint16_t(cpuRead_(byteAddr)); }
+    void cpuWriteWord(uint32_t byteAddr, uint16_t value) const { cpuWrite_(byteAddr, value); }
+    // the machine's reset button: the game boots again, keeping its CMOS
+    void reset() const { reset_(); }
 
     // the driver tables (valid while no game runs, or for the running game)
     int driverIndex(const QString& set) const;
@@ -101,4 +106,7 @@ private:
     int (*driverRom_)(int, int, const char**, unsigned*, unsigned*, unsigned*) = nullptr;
     void (*cheevosInit_)() = nullptr;
     unsigned (*readRam_)(unsigned, unsigned char*, unsigned) = nullptr;
+    unsigned (*cpuRead_)(unsigned) = nullptr;
+    void (*cpuWrite_)(unsigned, unsigned) = nullptr;
+    void (*reset_)() = nullptr;
 };

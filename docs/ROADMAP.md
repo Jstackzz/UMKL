@@ -24,9 +24,8 @@
    only on one PC so far.
 2. **Training**: no timer and health refills (RAM writes on both PCs alike), back to the select screen, record and
    play back the dummy.
-3. **Jukebox and sound levels**: the games' music comes from their sound ROMs, not files; watch the sound commands to
-   know what plays, silence it in what the player hears and play their own songs. Master volume works now; music and
-   effects apart need the sound split.
+3. **Sound levels**: master volume works now; music and effects apart need the games' sound split (their music
+   comes from their sound ROMs, not files).
 4. **Spectating** lobby matches (the server passes the players' feeds; the game would play them back) and King of the
    Hill lobbies: the protocol has both, this app offers neither yet (its hello says so).
 5. **Controls page** (remapping), and an updater for the players' zip (`tools/package.ps1` makes it: no ROMs, the Qt

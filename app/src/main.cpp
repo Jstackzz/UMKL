@@ -168,11 +168,26 @@ int main(int argc, char* argv[])
         if (win && size.size() == 2)
             win->resize(size[0].toInt(), size[1].toInt());
         const QString out = arg("--shot", "shot.png");
+        // steps: menu buttons (accept, down...), "wait:<ms>", and keys a player presses in a game ("key:enter",
+        // "key:u": pressed for a tenth of a second, as the keyboard would)
         const QStringList steps = arg("--nav", "").split(',', Qt::SkipEmptyParts);
         const int wait = arg("--wait", "4000").toInt();
+        static const QMap<QString, int> keys = {{"enter", Qt::Key_Return}, {"u", Qt::Key_U}, {"j", Qt::Key_J},
+                                                {"i", Qt::Key_I}, {"left", Qt::Key_Left}, {"right", Qt::Key_Right},
+                                                {"up", Qt::Key_Up}, {"down", Qt::Key_Down}};
         int t = wait;
         for (const QString& s : steps) {
-            QTimer::singleShot(t, &input, [&input, s] { emit input.nav(s); });
+            if (s.startsWith(QLatin1String("wait:"))) {
+                t += s.mid(5).toInt();
+                continue;
+            }
+            if (s.startsWith(QLatin1String("key:"))) {
+                const int key = keys.value(s.mid(4), 0);
+                QTimer::singleShot(t, &input, [&input, key] { input.keyEvent(key, true, false); });
+                QTimer::singleShot(t + 100, &input, [&input, key] { input.keyEvent(key, false, false); });
+            } else {
+                QTimer::singleShot(t, &input, [&input, s] { emit input.nav(s); });
+            }
             t += 700;
         }
         QTimer::singleShot(t + wait, &app, [win, out, &app, &session] {

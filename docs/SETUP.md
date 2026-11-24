@@ -56,6 +56,15 @@ What differs from upstream, all in the build (external/FBNeo stays as cloned):
   through a match; MK1 0xA264 / 0xA2C0, in each player's own block, where a player who lost a round without a win of
   their own reads 255 and both go back to 0 about 3 seconds after the match.
 - The server's `match_result` status is `agreed` for a counted match and `practice` for an Online Practice one.
+- Local play: START plays two coins, then start (UMK3 wants 2 credits to start); the boot's BLOCK presses stop at a
+  player's first START (after frame 300), else on the select screen they picked the fighter under the cursor (MK1's
+  is Kano) and confirmed UMK3's mode.
+- Hidden fighters (`UnlockHidden`, GameSession.cpp): MK3's EJB menu SMOKE writes CMOS slot 10h, UMK3's ENABLE
+  HIDDENS slots 1Fh-21h (Mileena, Ermac, Classic Sub-Zero), all 0EDB0h. A slot is 4 CMOS words of a byte each, high
+  byte first, at word 800h + 4 * slot (byte address 0x280000 + 2 * word, after a write to 0x290000 opens it); words
+  8B0h-8B1h are the one's complement of the sum of the bytes of words 800h-8AFh. The game reads them into RAM at
+  power-up (UMK3: words C43Ch, C43Eh, C440h), so the app writes CMOS before the first frame, or after a first boot
+  restored the factory settings (frame 300) and then resets the machine; online, at that frame on both PCs.
 - The app's data: `%APPDATA%\MK Arcade Online` (settings.ini with the remembered sign-in, nvram, art: the cards'
   pictures, saved from the attract modes; online.log; sessions\<game>-<time>\game.log, the newest 20 matches).
   `MKA_DATA_DIR` puts it elsewhere (two copies on one PC).

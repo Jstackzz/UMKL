@@ -17,7 +17,6 @@ Item {
         {id: "versus", label: "VERSUS", tag: "2P"},
         {id: "online", label: "ONLINE", tag: ""},
         {id: "training", label: "TRAINING", tag: "SOON", locked: true},
-        {id: "jukebox", label: "JUKEBOX", tag: "SOON", locked: true},
         {id: "settings", label: "SETTINGS", tag: ""},
         {id: "quit", label: "QUIT", tag: ""}
     ]

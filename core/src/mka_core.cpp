@@ -3,6 +3,7 @@
 // Linked into mka_fbneo.dll with FBNeo, so subject to the FB Neo license (external/FBNeo/src/license.txt).
 #include "burner.h"
 #include "fbheadless.h"
+#include "tms34_intf.h"
 
 #include <cstring>
 
@@ -179,6 +180,24 @@ int MKA_DriverRom(int index, int rom, const char** name, unsigned* length, unsig
             *type = ri.nType;
         return 1;
     }, 0);
+}
+
+// The main CPU's memory as the game sees it, between frames, by BYTE address (the TMS34010's bit address / 8): its
+// handlers included, so the CMOS (battery RAM) answers through its write-enable latch as it does for the game. How a
+// game's settings slots are read and written: the hidden fighters' unlocks live there (MK3, UMK3).
+unsigned MKA_CpuReadWord(unsigned byte_address)
+{
+    TMS34010Open(0);
+    const UINT16 v = TMS34010ReadWord(byte_address);
+    TMS34010Close();
+    return v;
+}
+
+void MKA_CpuWriteWord(unsigned byte_address, unsigned value)
+{
+    TMS34010Open(0);
+    TMS34010WriteWord(byte_address, (UINT16)value);
+    TMS34010Close();
 }
 
 }  // extern "C"

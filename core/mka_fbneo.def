@@ -41,3 +41,5 @@ EXPORTS
     MKA_DriverText
     MKA_DriverIndex
     MKA_DriverRom
+    MKA_CpuReadWord
+    MKA_CpuWriteWord

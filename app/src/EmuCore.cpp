@@ -38,7 +38,9 @@ bool EmuCore::load(const QString& dllPath, QString* error)
               bind(driverCount_, "MKA_DriverCount", error) && bind(driverText_, "MKA_DriverText", error) &&
               bind(driverIndex_, "MKA_DriverIndex", error) && bind(driverRom_, "MKA_DriverRom", error) &&
               bind(cheevosInit_, "FBHeadlessCheevosInit", error) &&
-              bind(readRam_, "FBHeadlessReadAchievementMemory", error);
+              bind(readRam_, "FBHeadlessReadAchievementMemory", error) &&
+              bind(cpuRead_, "MKA_CpuReadWord", error) && bind(cpuWrite_, "MKA_CpuWriteWord", error) &&
+              bind(reset_, "FBHeadlessReset", error);
     if (!ok) {
         unload();
         return false;

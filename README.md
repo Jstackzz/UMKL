@@ -16,11 +16,12 @@ hub tiles, tabbed settings, an on-screen keyboard, a pause menu, all steered wit
 | Determinism | checked: drawn and undrawn frames, saving and loading every frame, replays from a saved state all give identical states (`tools/py/coretest.py`) |
 | Rollback netplay (GekkoNet) | done and checked on all four games: two copies at 0 frames input delay re-ran 1,000 to 1,300 frames each (rollbacks 12 deep) and agreed at every confirmed checkpoint |
 | App shell | done: Qt Quick menus, game thread with sound (SDL3) and frame pacing, controllers (SDL3) and keyboard |
-| Menus | title, home carousel, online hub, sign-in, matchmaking, lobbies, leaderboard, direct connect, settings, in-game pause; Training and Jukebox are marked SOON |
+| Menus | title, home carousel, online hub, sign-in, matchmaking, lobbies, leaderboard, direct connect, settings, in-game pause; Training is marked SOON |
 | Local play | Arcade (1P) and Versus (2P); START puts in a coin and joins |
 | Online without a server | Direct Connect (host or join by address) |
 | Ranked, Kasual, Lobbies, Online Practice, Leaderboard | done, on the MK3D server (the same accounts): checked end to end on a local copy of the server, two copies of the app playing by themselves (UMK3 and MK1 Kasual, an MK2 ranked set of 3, an MK3 lobby, a UMK3 practice room). The server change that adds the arcade games (`mk3d-rollback/server`) is live on the Oracle server since 2026-11-24 |
 | WaveNet | left out: the two WaveNet prototypes (`umk3w`, `umk3wp`) are not in the core |
+| Hidden fighters | unlocked: Smoke in MK3; Mileena, Ermac and Classic Sub-Zero in UMK3 (the games' own CMOS unlocks, online too) |
 
 ## Build
 

@@ -9,6 +9,8 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QMetaObject>
+#include <QHash>
+#include <QList>
 #include <QSettings>
 #include <QTemporaryDir>
 
@@ -100,8 +102,8 @@ private:
     HANDLE timer_ = nullptr;
 };
 
-// An arcade game wants coins. Pressing START plays coin, then start, so a player never sees a credit screen; the
-// result is ordinary input, so online both games get it the same.
+// An arcade game wants coins. Pressing START plays two coins (UMK3 takes 2 credits to start, or to continue), then
+// start, so a player never sees a credit screen; the result is ordinary input, so online both games get it the same.
 class CoinPilot {
 public:
     uint16_t apply(uint16_t raw)
@@ -112,11 +114,11 @@ public:
         lastStart_ = start;
         raw &= ~pad::Start;
         if (t_ > 0) {
-            if (t_ <= 4)
+            if (t_ <= 4 || (t_ >= 9 && t_ <= 12))
                 raw |= pad::Coin;
-            else if (t_ >= 22 && t_ <= 26)
+            else if (t_ >= 26 && t_ <= 30)
                 raw |= pad::Start;
-            if (++t_ > 26)
+            if (++t_ > 30)
                 t_ = 0;
         }
         return raw;
@@ -216,6 +218,53 @@ uint16_t Autoplay(const std::string& how, int side, uint64_t f)
         return pad::LowPunch;
     return 0;
 }
+
+// MK3 and UMK3 keep their hidden fighters' unlocks in CMOS, where their own EJB menus put them: UMK3's ENABLE HIDDENS
+// writes slots 1Fh, 20h and 21h (Mileena, Ermac, Classic Sub-Zero), MK3's SMOKE slot 10h, all with the value 0EDB0h.
+// A slot is four CMOS words of a byte each, high byte first, at word 800h + 4 * slot; words 8B0h-8B1h hold the one's
+// complement of the sum of the bytes of words 800h-8AFh, which the game checks at power-up. The game copies the
+// unlocks to RAM at power-up, so a change made after it booted counts from its next boot (a reset).
+enum class Unlock { Nothing, Done, NotYet };
+Unlock UnlockHidden(const EmuCore& core, const QString& set)
+{
+    static const QHash<QString, QList<int>> kSlots = {{QStringLiteral("umk3"), {0x1F, 0x20, 0x21}},
+                                                      {QStringLiteral("mk3"), {0x10}}};
+    const auto hidden = kSlots.find(set);
+    if (hidden == kSlots.end())
+        return Unlock::Nothing;
+    constexpr uint32_t kCmos = 0x01400000 / 8, kEnable = 0x01480000 / 8;  // byte addresses
+    auto rd = [&](int w) { return int(core.cpuReadWord(kCmos + uint32_t(w) * 2) & 0xFF); };
+    auto wr = [&](int w, int v) {
+        core.cpuWriteWord(kEnable, 0);  // opens CMOS for one write, as the game does
+        core.cpuWriteWord(kCmos + uint32_t(w) * 2, uint16_t(v));
+    };
+    auto sum = [&] {
+        int s = 0;
+        for (int w = 0x800; w < 0x8B0; w++)
+            s += rd(w);
+        return s;
+    };
+    if (((~sum()) & 0xFFFF) != (rd(0x8B0) << 8 | rd(0x8B1)))
+        return Unlock::NotYet;  // not set up yet: a first boot restores the factory settings
+    static const int kUnlocked[4] = {0x00, 0x00, 0xED, 0xB0};
+    bool changed = false;
+    for (int slot : *hidden)
+        for (int i = 0; i < 4; i++) {
+            const int w = 0x800 + slot * 4 + i;
+            if (rd(w) != kUnlocked[i]) {
+                wr(w, kUnlocked[i]);
+                changed = true;
+            }
+        }
+    if (!changed)
+        return Unlock::Nothing;
+    const int c = (~sum()) & 0xFFFF;
+    wr(0x8B0, c >> 8);
+    wr(0x8B1, c & 0xFF);
+    return Unlock::Done;
+}
+// a first boot has restored its factory settings by then (MK3 and UMK3 at frame 116), and no game takes a START yet
+constexpr uint64_t kUnlockFrame = 300;
 
 // how colourful a picture is (Hasler and Suesstrunk), so a card shows a fighter rather than a black fade
 double Colorfulness(const uint8_t* px, int w, int h, int pitch)
@@ -581,6 +630,17 @@ void GameSession::run(QString set, QString mode, std::shared_ptr<NetConfig> net,
         return;
     }
 
+    // the hidden fighters (MK3, UMK3): unlocked in CMOS before the game first reads it, or, on a first boot (no
+    // battery RAM yet, as every online match has), once it has restored its factory settings, and then it boots again
+    bool unlockLater = UnlockHidden(core, set) == Unlock::NotYet;
+    auto unlockAfterBoot = [&] {
+        unlockLater = false;
+        if (UnlockHidden(core, set) == Unlock::Done) {
+            core.reset();
+            note(QStringLiteral("hidden fighters unlocked in CMOS: the game boots again"));
+        }
+    };
+
     Audio audio;
     if (!test)
         audio.open(core.sampleRate());
@@ -604,6 +664,8 @@ void GameSession::run(QString set, QString mode, std::shared_ptr<NetConfig> net,
             JoinPilot::at(f, p1, p2);
         else
             p1 = p2 = BootPilot(f, true);
+        if (joinFirst && unlockLater && f == kUnlockFrame)
+            unlockAfterBoot();  // the same frame on both PCs: they stay alike
         core.setPads(p1, p2);
         core.runFrame(false);
     }
@@ -670,6 +732,7 @@ void GameSession::run(QString set, QString mode, std::shared_ptr<NetConfig> net,
     QImage bestImg;
     auto next = Clock::now();
     bool wasPaused = false;
+    bool playerStarted = false;  // local play: a player pressed START, the boot's BLOCK presses are over
     int statsTick = 0, maxRollback = 0, rolledThisTick = 0, deepestRollback = 0;
     uint64_t rolledTotal = 0;
     std::map<uint64_t, uint32_t> pendingHash;
@@ -698,6 +761,8 @@ void GameSession::run(QString set, QString mode, std::shared_ptr<NetConfig> net,
                 break;
             }
             frame = 0;
+            playerStarted = false;
+            unlockLater = UnlockHidden(core, set) == Unlock::NotYet;
             audio.clear();
             next = Clock::now();
         }
@@ -712,14 +777,23 @@ void GameSession::run(QString set, QString mode, std::shared_ptr<NetConfig> net,
         wasPaused = false;
 
         if (!net) {
+            if (unlockLater && frame == kUnlockFrame)
+                unlockAfterBoot();
             uint16_t p1 = 0, p2 = 0;
             if (!preview) {
-                p1 = coins[0].apply(input_->padState(0));
-                p2 = versus ? coins[1].apply(input_->padState(1)) : 0;
+                const uint16_t raw1 = input_->padState(0), raw2 = versus ? input_->padState(1) : 0;
+                // from a player's first START on, the game is theirs: the boot's BLOCK presses below would pick the
+                // fighter under the cursor on the select screen (and UMK3's mode) for them
+                if ((raw1 | raw2) & pad::Start)
+                    playerStarted = true;
+                p1 = coins[0].apply(raw1);
+                p2 = versus ? coins[1].apply(raw2) : 0;
             }
             // every boot, not only a first one: battery RAM saved before the game had restored its settings (a
-            // preview stopped early) brings the CMOS screen back, and nothing else would press past it
-            const uint16_t boot = BootPilot(frame, true);
+            // preview stopped early) brings the CMOS screen back, and nothing else would press past it. That screen
+            // is up within 2 s (MK1 and MK2 at once, MK3 and UMK3 at frame 116), so the presses of the first 5 s
+            // (frames 120 and 270) stay whatever the player does; no game takes a START that early
+            const uint16_t boot = playerStarted && frame >= 300 ? 0 : BootPilot(frame, true);
             core.setPads(p1 | boot, p2 | boot);
             core.runFrame(true);
             present();

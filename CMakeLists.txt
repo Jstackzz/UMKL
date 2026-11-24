@@ -1,6 +1,6 @@
 # MK Arcade Online: the emulation core (core/, FBNeo's Midway drivers, FB Neo license) and the app (app/, MIT).
 cmake_minimum_required(VERSION 3.24)
-project(MKArcadeOnline VERSION 0.1.0 LANGUAGES C CXX)
+project(MKArcadeOnline VERSION 0.1.1 LANGUAGES C CXX)
 
 # Qt 6.12 (msvc2022_64). The MK3D project's copy is used when this one has none (docs/SETUP.md).
 if(NOT CMAKE_PREFIX_PATH)
