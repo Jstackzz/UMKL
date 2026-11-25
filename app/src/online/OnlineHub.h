@@ -19,6 +19,8 @@ class OnlineHub : public QObject {
     Q_PROPERTY(QString account READ account NOTIFY changed)
     Q_PROPERTY(QString lastName READ lastName NOTIFY changed)  // the name signed in with last
     Q_PROPERTY(bool remembered READ remembered NOTIFY changed)  // a sign-in to resume
+    // this PC never signed in (no sign-in remembered, no name saved): the first PRESS START asks for an account
+    Q_PROPERTY(bool newHere READ newHere NOTIFY changed)
     Q_PROPERTY(bool waiting READ waiting NOTIFY changed)        // a sign-in on its way
     Q_PROPERTY(QString error READ error NOTIFY changed)         // the last thing that went wrong, for the screen showing it
     Q_PROPERTY(QString motd READ motd NOTIFY changed)
@@ -52,6 +54,7 @@ public:
     QString account() const;
     QString lastName() const;
     bool remembered() const;
+    bool newHere() const;
     bool waiting() const { return waiting_; }
     QString error() const { return error_; }
     QString motd() const;

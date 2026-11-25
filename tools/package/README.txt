@@ -41,15 +41,19 @@ CONTROLS
 In the menus: d-pad or arrows to move, A or Enter to choose, B or Esc to go back, LB / RB (Q / E) to change game or
 tab, Y (Tab) for settings. F11 switches between full screen and a window.
 
-Local play: ARCADE for one player, VERSUS for two controllers. START puts in a coin and joins.
+Local play: ARCADE for one player, VERSUS for two controllers. START puts in the credits and joins.
 
 
 ONLINE
 ------
 
-Pick a game, then ONLINE. Ranked, Kasual, Lobbies, Online Practice and the leaderboard need an account on the MK3D
-Online server: sign in with your MK3D account, or make one there (CREATE ACCOUNT). Direct Connect needs no account:
-one player hosts, the other types the host's address (the host forwards the game port, 7101 UDP, on their router).
+The first time you press START, the app asks you to make an account on the MK3D Online server (a name and a
+password), or to sign in with the one you have (MK3D Online accounts work here too: I ALREADY HAVE AN ACCOUNT). Not
+now? Press B (Later): you can do it any time from a game's ONLINE.
+
+Pick a game, then ONLINE. Ranked, Kasual, Lobbies, Online Practice and the leaderboard need that account. Direct
+Connect needs none: one player hosts, the other types the host's address (the host forwards the game port, 7101 UDP,
+on their router).
 
   Ranked           first to 3 match wins takes the set; your Elo gives your rank.
   Kasual           anyone, with rematches.

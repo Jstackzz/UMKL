@@ -19,6 +19,7 @@ Window {
     property int artRevision: 0
     property string wantPreview: ""
     property bool quitting: false
+    property bool askedForAccount: false  // this run's PRESS START asked a new PC for an account already
     readonly property bool inGame: stack.currentItem && stack.currentItem.objectName === "game"
 
     Binding { target: Theme; property: "s"; value: Math.min(win.width / 1920, win.height / 1080) }
@@ -35,11 +36,21 @@ Window {
     }
     // this screen gives way to another (sign-in to what it was for)
     function replace(name, props) {
-        const comp = {match: matchComp, lobbies: lobbiesComp, lobby: lobbyComp, board: boardComp}[name]
+        const comp = {home: homeComp, match: matchComp, lobbies: lobbiesComp, lobby: lobbyComp, board: boardComp}[name]
         props.app = win
         stack.replace(comp, props)
     }
     function goHome() { stack.push(homeComp, {app: win}) }
+    // PRESS START. On a PC that never signed in, the account screen comes first, once a run, while the server is
+    // there (as the MK3D launcher opens its account window): make one or sign in, or "later"; then the home screen
+    function leaveTitle() {
+        if (!askedForAccount && online.newHere && online.state !== "offline") {
+            askedForAccount = true
+            push("signin", {next: "home", nextProps: {}, welcome: true})
+        } else {
+            goHome()
+        }
+    }
     function toast(t) { toastItem.show(t) }
     // options: {keepCase: true} for names, {keepCase: true, secret: true} for passwords
     function keyboard(title, text, digits, max, done, options) { osk.open(title, text, digits, max, done, options) }
@@ -179,7 +190,7 @@ Window {
 
         MatchFound { id: found }
         Toast { id: toastItem }
-        OnScreenKeyboard { id: osk }
+        OnScreenKeyboard { id: osk; objectName: "osk" }  // the name: --shot's type: steps
 
         // quit?
         Rectangle {

@@ -17,7 +17,8 @@ hub tiles, tabbed settings, an on-screen keyboard, a pause menu, all steered wit
 | Rollback netplay (GekkoNet) | done and checked on all four games: two copies at 0 frames input delay re-ran 1,000 to 1,300 frames each (rollbacks 12 deep) and agreed at every confirmed checkpoint |
 | App shell | done: Qt Quick menus, game thread with sound (SDL3) and frame pacing, controllers (SDL3) and keyboard |
 | Menus | title, home carousel, online hub, sign-in, matchmaking, lobbies, leaderboard, direct connect, settings, in-game pause; Training is marked SOON |
-| Local play | Arcade (1P) and Versus (2P); START puts in a coin and joins |
+| Local play | Arcade (1P) and Versus (2P); START puts in the credits and joins |
+| First start | on a PC that never signed in, the first PRESS START asks for an account (make one, or sign in), as the MK3D launcher does; B is "later" |
 | Online without a server | Direct Connect (host or join by address) |
 | Ranked, Kasual, Lobbies, Online Practice, Leaderboard | done, on the MK3D server (the same accounts): checked end to end on a local copy of the server, two copies of the app playing by themselves (UMK3 and MK1 Kasual, an MK2 ranked set of 3, an MK3 lobby, a UMK3 practice room). The server change that adds the arcade games (`mk3d-rollback/server`) is live on the Oracle server since 2026-11-24 |
 | WaveNet | left out: the two WaveNet prototypes (`umk3w`, `umk3wp`) are not in the core |
@@ -61,6 +62,11 @@ certificate pinned by fingerprint in `Settings.h`), with the MK3D launcher's acc
 account. The server keeps the two products apart (the hello's `product`): arcade players see only the arcade games,
 counts, lobbies and records, and MK3D players only theirs.
 
+A PC that never signed in (no remembered sign-in, no name saved) connects as the app starts, and its first PRESS
+START of a run opens the account screen on CREATE ACCOUNT (the password typed twice), with I ALREADY HAVE AN ACCOUNT
+to sign in instead; B (Later) goes on to the home screen. That is the MK3D launcher's way: its account window opens by
+itself the first time it is connected. With the server out of reach, START goes straight on.
+
 - **Ranked**: first to 3 match wins takes the set; Elo moves once per set; the leaderboard ranks by it.
 - **Kasual**: anyone, with rematches as long as both want them.
 - **Lobbies**: a room with a 5-letter code (and a password if wanted), chat; both players ready starts the match.
@@ -92,7 +98,9 @@ MKArcade.exe --net-test set=umk3 side=2 port=7102 peer=127.0.0.1:7101 delay=0 fr
 
 play scripted inputs against each other with rollback; `a.txt` and `b.txt` must list the same state hashes.
 `MKArcade.exe --shot out.png --nav start,down,accept` presses menu buttons and saves the window as a picture (with
-`QSG_RENDER_LOOP=basic` when the window may be behind others, or its transitions never finish).
+`QSG_RENDER_LOOP=basic` when the window may be behind others, or its transitions never finish). Other steps:
+`wait:<ms>`, `key:<name>` (a key a player presses in a game), `type:<text>` (typed into the on-screen keyboard) and
+`snap:<name>` (a picture part-way, `out-<name>.png`).
 
 A whole online match on this PC, against a local copy of the server (fresh database and certificate):
 

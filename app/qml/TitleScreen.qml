@@ -10,7 +10,7 @@ Item {
     property int pick: 0
 
     function nav(a) {
-        if (a === "accept" || a === "start") app.goHome()
+        if (a === "accept" || a === "start") app.leaveTitle()
         else if (a === "back") app.confirmQuit()
     }
     function nextPreview() {

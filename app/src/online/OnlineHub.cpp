@@ -151,9 +151,13 @@ OnlineHub::OnlineHub(QObject* parent) : QObject(parent)
     connect(&clock_, &QTimer::timeout, this, &OnlineHub::tick);
     clock_.start();
 
-    // a remembered sign-in: on the server from the start, as the console menus show who is signed in
+    // a remembered sign-in: on the server from the start, as the console menus show who is signed in. A PC that never
+    // signed in connects at once too: its first PRESS START asks for an account while the server is there to make one
+    // (the MK3D launcher asks once it is connected)
     if (!S()->token().isEmpty())
         QTimer::singleShot(1500, this, &OnlineHub::connectServer);
+    else if (newHere())
+        QTimer::singleShot(0, this, &OnlineHub::connectServer);
 }
 
 OnlineHub::~OnlineHub()
@@ -181,6 +185,7 @@ QString OnlineHub::state() const
 QString OnlineHub::account() const { return server_->accountName(); }
 QString OnlineHub::lastName() const { return S()->savedName(); }
 bool OnlineHub::remembered() const { return !S()->token().isEmpty(); }
+bool OnlineHub::newHere() const { return S()->token().isEmpty() && S()->savedName().isEmpty(); }
 QString OnlineHub::motd() const { return Str(server_->welcome(), "motd"); }
 
 QString OnlineHub::phase() const

@@ -21,6 +21,7 @@
 #include "online/GameProcess.h"
 #include "online/OnlineHub.h"
 
+#include <QFileInfo>
 #include <QFont>
 #include <QGuiApplication>
 #include <QMap>
@@ -168,8 +169,9 @@ int main(int argc, char* argv[])
         if (win && size.size() == 2)
             win->resize(size[0].toInt(), size[1].toInt());
         const QString out = arg("--shot", "shot.png");
-        // steps: menu buttons (accept, down...), "wait:<ms>", and keys a player presses in a game ("key:enter",
-        // "key:u": pressed for a tenth of a second, as the keyboard would)
+        // steps: menu buttons (accept, down...), "wait:<ms>", keys a player presses in a game ("key:enter", "key:u":
+        // pressed for a tenth of a second, as the keyboard would), "type:<text>" (typed into the on-screen keyboard,
+        // as a keyboard does) and "snap:<name>" (a picture now, out-<name>.png beside the last one)
         const QStringList steps = arg("--nav", "").split(',', Qt::SkipEmptyParts);
         const int wait = arg("--wait", "4000").toInt();
         static const QMap<QString, int> keys = {{"enter", Qt::Key_Return}, {"u", Qt::Key_U}, {"j", Qt::Key_J},
@@ -181,7 +183,23 @@ int main(int argc, char* argv[])
                 t += s.mid(5).toInt();
                 continue;
             }
-            if (s.startsWith(QLatin1String("key:"))) {
+            if (s.startsWith(QLatin1String("snap:"))) {
+                const QFileInfo fi(out);
+                const QString file = fi.path() + '/' + fi.completeBaseName() + '-' + s.mid(5) + ".png";
+                QTimer::singleShot(t, win, [win, file] { win->grabWindow().save(file); });
+                t += 300;  // the picture before the next step
+                continue;
+            }
+            if (s.startsWith(QLatin1String("type:"))) {
+                const QString text = s.mid(5);
+                QTimer::singleShot(t, win, [win, text] {
+                    QObject* osk = win->findChild<QObject*>(QStringLiteral("osk"));
+                    for (const QChar c : text)
+                        if (osk)
+                            QMetaObject::invokeMethod(osk, "typed", Q_ARG(QVariant, QVariant(QString(c))),
+                                                      Q_ARG(QVariant, QVariant(0)));
+                });
+            } else if (s.startsWith(QLatin1String("key:"))) {
                 const int key = keys.value(s.mid(4), 0);
                 QTimer::singleShot(t, &input, [&input, key] { input.keyEvent(key, true, false); });
                 QTimer::singleShot(t + 100, &input, [&input, key] { input.keyEvent(key, false, false); });
